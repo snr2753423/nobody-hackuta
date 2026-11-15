@@ -70,3 +70,8 @@
 - Name choice (Nobody / Odysseus) with a real consequence: brothers stay and two-lane boulders on the Odysseus path. Both paths verified by autopilot in the pane (see final report).
 - Rhythm gate fixed the wave-vs-raise near-miss. Bug found on the way: the first reversal counter never registered the first rise, so every count was 0. Fixed with a 3-state counter. Dims chosen by total variation, not range (the raise dominated range and hid the waving elbow).
 - Tests ALL PASS. tsc/eslint/build clean.
+
+## Push: ~5:00 PM
+- Commit 7cc0249 (name choice + rhythm gate). Scanned the staged files and full history for the key: 0 matches.
+- `gh repo create snr2753423/nobody-hackuta --public --source=. --push` (user chose public).
+- Verified: visibility PUBLIC; remote main = local HEAD 7cc0249; logged-out page 200; raw `.env.local` 404; `.env.local.example` blank.

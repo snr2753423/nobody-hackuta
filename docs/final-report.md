@@ -100,7 +100,7 @@ Copied from the run ledger.
 - **Real-camera automated tests: not possible.** The in-app browser blocks the camera. Live camera behavior was verified only by the user, three rounds.
 - **90-second first-time-judge test (acceptance #10):** not run with a real person yet.
 - **Wave-vs-raise near-miss:** fixed after the first ship pass (see below). Mitigations: the Forge tip asks for moves with distinct arm paths, and the strict sensitivity setting.
-- **No git commits yet and no GitHub remote.** Commits and the push wait for your go-ahead. The Devpost repository link is MISSING until then.
+- **Repository:** pushed to https://github.com/snr2753423/nobody-hackuta (public) at commit 7cc0249. Verified: the page loads logged out, `.env.local` returns 404, and `.env.local.example` is blank.
 - **Demo video: not recorded.** It needs your camera and voice. The script is in `docs/demo-script.md`.
 - **Pitch timing:** the script is timed to 3:00 (HackUTA's format), not the pitch skill's default 4:00.
 

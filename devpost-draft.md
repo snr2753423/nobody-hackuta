@@ -69,6 +69,6 @@ Synthetic data proves the logic, but only a real body in front of a real camera 
 - dynamic-time-warping
 
 ## Links
-- **Repository:** MISSING. The project has no git remote and no commits yet. Push it to GitHub, open the URL to confirm it loads, and paste it here.
+- **Repository:** https://github.com/snr2753423/nobody-hackuta (public; verified it loads logged out, at commit 7cc0249)
 - **Demo:** BLOCKED. Deploying to Vercel needs a login that isn't on this machine (no Vercel CLI or session). The demo runs on localhost, judged in person.
 - **Video:** MISSING. Record it following `docs/demo-script.md`, watch it all the way through, then upload it (YouTube, unlisted).
