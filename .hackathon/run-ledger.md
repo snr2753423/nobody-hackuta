@@ -64,3 +64,9 @@
 - readme-writer: README.md. Clean-copy verification in scratchpad: `npm ci` ok, `npm run build` compiled, `next start` page 200, /api/forge live Gemini (Frost → ice, 2.5 s stun, 1640 ms), `npm run test:gestures` ALL PASS. Links opened: ai.google.dev/edge/mediapipe 200, nextjs.org 200, github.com/cindyzli/jigglewiggle 200, phaser.io 403 (bot block) → replaced with github.com/phaserjs/phaser 200.
 - devpost-autofiller: devpost-draft.md. Repository MISSING (no remote/commits), Demo BLOCKED (no deploy), Video MISSING (not recorded).
 - final-report.md updated.
+
+## Commit + post-ship fixes: ~4:10–4:45 PM
+- Initial commit ed26152 on main (51 files). Caught before committing: the real Gemini key was in `.env.local.example` (tracked). Unstaged, blanked the example, rescanned the staged files (clean), then committed. The key lives only in the gitignored `.env.local`.
+- Name choice (Nobody / Odysseus) with a real consequence: brothers stay and two-lane boulders on the Odysseus path. Both paths verified by autopilot in the pane (see final report).
+- Rhythm gate fixed the wave-vs-raise near-miss. Bug found on the way: the first reversal counter never registered the first rise, so every count was 0. Fixed with a 3-state counter. Dims chosen by total variation, not range (the raise dominated range and hid the waving elbow).
+- Tests ALL PASS. tsc/eslint/build clean.

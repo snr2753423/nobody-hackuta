@@ -2,7 +2,10 @@
 import type { AbilityConfig } from "./abilities";
 import type { Lean } from "./gesture/presets";
 
-export type GameResult = { won: boolean; score: number; timeMs: number };
+export type PlayerName = "nobody" | "odysseus";
+export type GameResult = { won: boolean; score: number; timeMs: number; name: PlayerName };
+/** The answer the player gave Polyphemus in the intro. Read by the fight when it starts. */
+export const story = { name: "nobody" as PlayerName };
 export type GameEvent =
   | { type: "blast" }
   | { type: "power"; id: string; config: AbilityConfig; conf: number }

@@ -16,8 +16,8 @@ Setup before the judge arrives:
 > "In the Odyssey, Odysseus escapes the Cyclops not by strength but by a lie: he says his name is *Nobody*. This game is that escape, and you're the controller. That glowing skeleton is you, tracked right here in the browser."
 
 **0:20–0:35 · Name the lie**
-**[DEMO]** The judge clicks *Enter the cave*, then *Continue*. Polyphemus asks their name; the only answer is "My name is… **Nobody**." The judge clicks it.
-> "That's the deception, and it pays off later in the fight."
+**[DEMO]** The judge clicks *Enter the cave*, then *Continue*. Polyphemus asks their name. They can lie ("My name is… **Nobody**") or tell the truth ("I am Odysseus"). Nudge them toward Nobody.
+> "That's the deception. It's a real choice, and it pays off later in the fight."
 
 **0:35–1:05 · Three body controls**
 > "Hands up raises your shield against his club. Lean to dodge the boulder. Arms out fires a blast."
@@ -26,7 +26,7 @@ Setup before the judge arrives:
 
 **1:05–1:20 · The Nobody beat** *(boss bar hits the halfway notch)*
 **[DEMO]** Stop talking. Polyphemus screams "NOBODY IS HURTING ME!" Three Cyclopes appear at the door, laugh, and leave: *"Reinforcements cancelled: no one comes for Nobody."*
-> "The lie you told at the start is why his brothers walk away. That's Book Nine, playing out in the fight."
+> "The lie you told at the start is why his brothers walk away. Tell the truth and they stay and throw boulders with him. That's Book Nine, playing out in the fight."
 
 **1:20–2:15 · Forge a Power** *(the centerpiece)*
 > "Now the real trick. Odysseus invents, so you invent. Click Forge a Power."

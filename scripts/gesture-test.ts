@@ -175,10 +175,11 @@ console.log("  " + "".padEnd(20) + allNames.map((n) => n.slice(0, 9).padStart(10
 for (const r of customNames) console.log("  " + r.padEnd(20) + allNames.map((c) => matrix[r][c].toFixed(2).padStart(10)).join(""));
 // Performed movements that genuinely contain the forged movement (A->B then back to A contains A->B):
 // firing at the peak is correct, so they are not counted as false fires.
-const CONTAINS: Record<string, string[]> = { rightArmSwipeUp: ["rightArmRaiseNoWave"], leftArmSweepOut: ["leftArmOutAndDown"] };
-// Known near-miss pairs: same large arm path, differing only by a small secondary motion (hand waving while
-// raised). Reported, not failed; the Forge tells players to pick moves with distinct arm paths.
-const NEAR_MISS: Record<string, string[]> = { waveRightOverhead: ["rightArmRaiseNoWave", "rightArmSwipeUp"], rightArmSwipeUp: ["waveRightOverhead"] };
+// A wave overhead also starts with a swipe up, so the swipe-up template firing during it is a correct prefix match.
+const CONTAINS: Record<string, string[]> = { rightArmSwipeUp: ["rightArmRaiseNoWave", "waveRightOverhead"], leftArmSweepOut: ["leftArmOutAndDown"] };
+// No exempt near misses: the rhythm gate (direction reversals in the most-varying joints) separates
+// "wave overhead" from "raise arm overhead", so those are hard requirements now.
+const NEAR_MISS: Record<string, string[]> = {};
 for (const r of customNames) {
   check(matrix[r][r] >= 5 / 6, `${r}: recognized itself in ${(matrix[r][r] * 6).toFixed(0)}/6`);
   const fps = allNames.filter((c) => c !== r && matrix[r][c] > 0 && !(CONTAINS[r] ?? []).includes(c) && !(NEAR_MISS[r] ?? []).includes(c));

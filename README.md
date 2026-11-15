@@ -4,12 +4,12 @@ A webcam game of the Cyclops episode from Homer's *Odyssey*, for HackUTA 2026. Y
 
 ## Demo path
 1. Open `http://localhost:3000` in Chrome and allow the camera. A glowing skeleton tracks you in the right-hand panel.
-2. Click **Enter the cave**, then **Continue**. Polyphemus asks your name. Answer **"My name is… Nobody."**
+2. Click **Enter the cave**, then **Continue**. Polyphemus asks your name. Answer **"My name is… Nobody."** You can also tell the truth, "I am Odysseus", and see what happens.
 3. Fight, seated:
    - **both hands up** = shield, which blocks the club slam
    - **lean left/right** = dodge, out of the boulder's red ring
    - **both arms out** = blast, which damages Polyphemus
-4. At half health he cries **"NOBODY IS HURTING ME!"** His brothers come to the cave mouth, laugh, and leave: no one comes for Nobody.
+4. At half health he cries **"NOBODY IS HURTING ME!"** His brothers come to the cave mouth, laugh, and leave: no one comes for Nobody. If you said "Odysseus", they stay and throw boulders too, so two lanes are deadly per throw.
 5. Click **⚒ Forge a Power**:
    1. Do a move 3 times (try a thunderbolt throw: high over your right shoulder, down across to your left hip).
    2. Test it, then name and describe it.
@@ -60,6 +60,7 @@ npm run test:gestures
   - the same direction as the recorded move (so returning to rest doesn't fire)
   - a similar path length
   - per-feature weights
+  - a rhythm check: direction reversals in the most-varying joints, so a wave and a plain arm raise don't match
 - **Firing:** a power fires at ≥50% confidence on 2 consecutive frames, then a cooldown starts. Strict/normal/loose sensitivity is set per power.
 - **Gemini, one job:** `POST /api/forge` turns your description into `{name, effect, damage, stunSeconds, cooldownSeconds, heal, flavor}`.
   - The effect comes from an 8-item allowlist.
@@ -79,9 +80,8 @@ npm run test:gestures
 ## What was cut
 - **More trials** (Sirens, Scylla and Charybdis), accounts, leaderboards, multiplayer: one trial polished end to end beats three fragile ones.
 - **A playable blinding or ram-escape phase:** these are shown as story beats and cards.
-- **A branching name choice:** the Nobody beat is scripted, so answering "Odysseus" doesn't summon the brothers. It's the obvious next step.
 - **Public deploy:** the demo runs on localhost. Deploying needs a Vercel login that wasn't set up.
-- **Known limitation:** forged moves that differ only by a small hand motion (wave overhead vs. raise arm overhead) can be confused. Pick moves with distinct arm paths.
+- **Known limitation:** live recognition has been tested on one person's body and camera. The false-fire numbers come from a synthetic-skeleton harness.
 
 ## Credits
 - [MediaPipe](https://ai.google.dev/edge/mediapipe) Pose Landmarker (Apache 2.0)

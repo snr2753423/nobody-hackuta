@@ -19,8 +19,9 @@ In Book 9 of Homer's *Odyssey*, Odysseus is trapped in the cave of Polyphemus, a
 - **Your body is the controller, seated.** Raise both hands to block the club slam. Lean left or right to escape the boulder. Hold both arms out to fire a blast.
 - **Forge a Power.** Perform any upper-body movement three times, name it, and describe it in plain words, for example "Thunderstrike: summon lightning and briefly stun enemies". Gemini turns your words into a game ability, and from then on performing that movement casts it in combat. No model training.
 - **The Nobody story is in the game, not just the title:**
-  - Polyphemus asks your name, and you answer "Nobody".
+  - Polyphemus asks your name. You choose: lie ("Nobody") or tell the truth ("Odysseus").
   - At half health he cries "NOBODY IS HURTING ME!" Three Cyclopes appear at the cave mouth, laugh, and leave: "Reinforcements cancelled: no one comes for Nobody."
+  - Tell the truth instead and he cries "ODYSSEUS IS HURTING ME!" His brothers stay and throw boulders with him, so two lanes are deadly on every throw. The end card points you back to Homer's lie.
   - You finish him with the olive stake ("NOBODY HAS BLINDED ME!") and escape beneath the rams.
 - **Win, lose, and restart:** boss and player health, score shown as κλέος (glory), and an instant restart.
 
@@ -29,7 +30,7 @@ In Book 9 of Homer's *Odyssey*, Odysseus is trapped in the cave of Polyphemus, a
 - **Features:** each frame becomes 14 numbers. They're joint angles plus wrist and elbow positions relative to the shoulder midpoint, scaled by shoulder width. No raw pixels.
 - **Presets:** rule-based detectors with hysteresis.
 - **Forge:** we trim the idle start and end of each sample, resample it, and merge the three into one template with DTW barycenter averaging. The match tolerance comes from how consistent the three samples were.
-- **Live recognition:** dynamic time warping with four extra gates: enough motion, the same direction (so returning to rest doesn't fire), a similar path length, and per-feature weights. Each power has a cooldown and its own sensitivity setting.
+- **Live recognition:** dynamic time warping with five extra gates: enough motion, the same direction (so returning to rest doesn't fire), a similar path length, a rhythm check (direction reversals in the most-varying joints, so a wave isn't a plain arm raise), and per-feature weights. Each power has a cooldown and its own sensitivity setting.
 - **Gemini has exactly one job.** One server route turns the description into `{name, effect, damage, stunSeconds, cooldownSeconds, heal, flavor}`:
   - The effect comes from an 8-item allowlist.
   - The server clamps every number for balance.
@@ -52,8 +53,7 @@ In Book 9 of Homer's *Odyssey*, Odysseus is trapped in the cave of Polyphemus, a
 Synthetic data proves the logic, but only a real body in front of a real camera finds the bugs that matter. Two of the three live rounds found real problems.
 
 ### What's next
-- **Make the name a real choice:** answer "Odysseus", and his brothers come.
-- **Fix the one known near-miss:** a waved hand vs. a plain raised arm.
+- **More live testing:** recognition has only been tested live on one person so far.
 - **Run first-time-player tests and deploy publicly.**
 - **Build the next trial:** the Sirens, where you must *not* move toward the song.
 

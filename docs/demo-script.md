@@ -10,7 +10,7 @@ Before recording:
 | --- | --- | --- | --- |
 | 0-8 | Title "NOBODY" on the terracotta vase field; webcam column with a glowing skeleton tracking me | Wait (wave once so the skeleton visibly follows) | "Odysseus escaped the Cyclops not by strength, but by inventing. So do you. Your body is the controller." |
 | 8-14 | Story card "THE CAVE" | Click *Enter the cave*, then *Continue* | "Homer, Odyssey, Book Nine: trapped in Polyphemus's cave." |
-| 14-20 | Polyphemus: "What is your name?" The only answer: "My name is… Nobody." | Click *My name is… Nobody* | "You tell him your name is Nobody. Remember that." |
+| 14-20 | Polyphemus: "What is your name?" Two answers: "My name is… Nobody." or "I am Odysseus, son of Laertes." | Click *My name is… Nobody* | "Lie, or tell the truth? Like Homer's hero, I say Nobody." |
 | 20-26 | Cave fight: black-figure Cyclops, dialogue "I will eat Nobody LAST!", boss bar, NOBODY HP bar | Wait for "FIGHT!" | "Three body controls, all seated." |
 | 26-34 | Red ring under my lane, "LEAN AWAY!", boulder lands beside me, "DODGED +100"; DODGE chip lights | Lean left | "Lean to dodge the boulder." |
 | 34-42 | Floor flashes, "HANDS UP — SHIELD!", golden shield ring, "BLOCKED +150"; SHIELD chip lights | Raise both hands | "Hands up blocks his club." |

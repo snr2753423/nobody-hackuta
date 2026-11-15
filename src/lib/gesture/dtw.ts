@@ -211,6 +211,56 @@ export function pathLength(seq: Seq, w?: number[]): number {
   return s;
 }
 
+/** Per-feature range of a sequence. */
+function ranges(seq: Seq): number[] {
+  return seq[0].map((_, d) => {
+    let lo = Infinity, hi = -Infinity;
+    for (const f of seq) { lo = Math.min(lo, f[d]); hi = Math.max(hi, f[d]); }
+    return hi - lo;
+  });
+}
+
+/**
+ * Rhythm signature: direction reversals in the template's most-varying features, with hysteresis
+ * (a swing must exceed 25% of that feature's template range to count). Waving reverses many times,
+ * a raise reverses once or never; the count barely changes with tempo.
+ */
+export function reversalCount(seq: Seq, dims: number[], hyst: number[]): number {
+  let total = 0;
+  dims.forEach((d, k) => {
+    const h = hyst[k];
+    let dir = 0, hi = seq[0][d], lo = seq[0][d];
+    for (let i = 1; i < seq.length; i++) {
+      const v = seq[i][d];
+      if (dir === 0) {
+        hi = Math.max(hi, v); lo = Math.min(lo, v);
+        if (v - lo > h) { dir = 1; hi = v; } else if (hi - v > h) { dir = -1; lo = v; }
+      } else if (dir === 1) {
+        if (v > hi) hi = v; else if (hi - v > h) { total++; dir = -1; lo = v; }
+      } else {
+        if (v < lo) lo = v; else if (v - lo > h) { total++; dir = 1; hi = v; }
+      }
+    }
+  });
+  return total;
+}
+
+type Rhythm = { dims: number[]; hyst: number[]; count: number };
+const rhythmCache = new WeakMap<Seq, Rhythm>();
+export function rhythmOf(tplFrames: Seq): Rhythm {
+  const hit = rhythmCache.get(tplFrames);
+  if (hit) return hit;
+  const r = ranges(tplFrames);
+  // Rank features by total variation (sum of |change|): oscillating joints score high even when their
+  // range is small, so a wave's elbow is chosen over the big one-way raise of the shoulder.
+  const tv = r.map((_, d) => tplFrames.reduce((acc, f, i) => (i ? acc + Math.abs(f[d] - tplFrames[i - 1][d]) : 0), 0));
+  const dims = tv.map((v, d) => [v, d] as const).sort((x, y) => y[0] - x[0]).slice(0, 4).map(([, d]) => d);
+  const hyst = dims.map((d) => Math.max(0.03, r[d] * 0.25));
+  const out = { dims, hyst, count: reversalCount(tplFrames, dims, hyst) };
+  rhythmCache.set(tplFrames, out);
+  return out;
+}
+
 /** Score the most recent movement in `history` against a template. */
 export function matchRecent(history: TimedFrame[], tpl: GestureTemplate, now: number, sensitivity: Sensitivity = "normal"): { conf: number; dist: number } {
   if (history.length < 6) return { conf: 0, dist: Infinity };
@@ -227,6 +277,7 @@ export function matchRecent(history: TimedFrame[], tpl: GestureTemplate, now: nu
   const tplNet = netChange(tpl.frames);
   const w = featureWeights(tpl.frames);
   const tplPath = pathLength(tpl.frames, w);
+  const rhythm = rhythmOf(tpl.frames);
   for (const scale of [0.7, 1.0, 1.35]) {
     const win = history.filter((h) => h.t >= now - tpl.durationMs * scale);
     if (win.length < 6) continue;
@@ -236,6 +287,8 @@ export function matchRecent(history: TimedFrame[], tpl: GestureTemplate, now: nu
     if (!sameDirection(rs, tplNet)) continue; // e.g. the return-to-rest of a one-way movement
     const pr = pathLength(rs, w) / (tplPath + 1e-9);
     if (pr < 0.7 || pr > 1.6) continue; // much less (or more) motion than the recorded move
+    const rc = reversalCount(rs, rhythm.dims, rhythm.hyst);
+    if (Math.abs(rc - rhythm.count) > Math.max(2, rhythm.count * 0.35)) continue; // e.g. a raise is not a wave
     const d = dtw(rs, tpl.frames, 0.3, w).dist;
     if (d < best) best = d;
   }

@@ -30,7 +30,7 @@ Status as of Saturday 2026-11-14, ~3:30 PM. Everything below is copied from `.ha
   - Win state: the olive stake blinds the eye. Lose state: a defeat card. Restart works.
   - Stun stops boss attacks. The single eye tracks the player.
 - **The Nobody story in gameplay**:
-  - Intro card: Polyphemus asks your name, and the only button is "My name is… **Nobody**."
+  - Intro card: Polyphemus asks your name. The player chooses: "My name is… **Nobody**" (the lie) or "I am **Odysseus**" (the truth).
   - Opening line: "I will eat Nobody LAST!"
   - At 50% boss HP, the Nobody mechanic triggers. He cries "NOBODY IS HURTING ME!", three Cyclopes appear at the cave mouth with a reinforcement warning, they answer "If NOBODY is hurting you… pray to Poseidon," and the banner reads "REINFORCEMENTS CANCELLED: No one comes for Nobody (+500 Trickster)". Phase 2 is enraged.
   - Victory: "NOBODY HAS BLINDED ME!", then the escape-under-the-rams card.
@@ -49,7 +49,7 @@ Copied from the run ledger.
   - **Forged movements**: 8 moves (wave overhead, arm circle, reverse arm circle, two-arm pump, punch across, cross arms, swipe up, sweep out) are each recognized 6/6. None fired on any distinct movement across 18 performed movements, including the shield/blast/lean presets.
   - **Reverse motions**: swipe-up template on swipe-down, sweep-out on sweep-in, and circle on reverse circle (both ways) are all 0/6.
   - **Held pose**: detected as static, fires when held, doesn't fire on idle/shield/blast.
-  - **Known near-miss** (reported, not hidden): a "wave overhead" template fires on "raise arm overhead" 4/6.
+  - **Wave vs. raise:** this was a near-miss at 4/6 (a "wave overhead" template firing on "raise arm overhead"). After the rhythm gate it's 0/6, and it's now a hard test.
 - `npx tsc --noEmit` and `npx eslint src scripts`: clean.
 - `npx next build` (Next 16.4.6): compiled. `/` is static, `/api/forge` is dynamic.
 - `/api/forge` with the key (dev server, curl):
@@ -99,10 +99,24 @@ Copied from the run ledger.
   - **Demo target:** localhost on the Mac.
 - **Real-camera automated tests: not possible.** The in-app browser blocks the camera. Live camera behavior was verified only by the user, three rounds.
 - **90-second first-time-judge test (acceptance #10):** not run with a real person yet.
-- **Wave-vs-raise near-miss:** not solved. A forged "wave overhead" can fire on a plain raised arm. Mitigations: the Forge tip asks for moves with distinct arm paths, and the strict sensitivity setting.
+- **Wave-vs-raise near-miss:** fixed after the first ship pass (see below). Mitigations: the Forge tip asks for moves with distinct arm paths, and the strict sensitivity setting.
 - **No git commits yet and no GitHub remote.** Commits and the push wait for your go-ahead. The Devpost repository link is MISSING until then.
 - **Demo video: not recorded.** It needs your camera and voice. The script is in `docs/demo-script.md`.
 - **Pitch timing:** the script is timed to 3:00 (HackUTA's format), not the pitch skill's default 4:00.
+
+## Post-ship fixes (~4:15–4:45 PM)
+- **Name choice:**
+  - The intro offers "Nobody" (the lie) or "Odysseus" (the truth).
+  - Odysseus path: the brothers answer his call, stay at the cave mouth, and every boulder attack covers two lanes (one safe lane).
+  - Odysseus path lines: "ODYSSEUS HAS BLINDED ME!", a different end card pointing back to Homer's lie, and a "Try again as Nobody" button. No Trickster bonus.
+  - Verified both paths with the browser-pane autopilot (dev, `?selftest`):
+    - Odysseus: reinforced, max 2 lanes, brothers visible, victory "Odysseus escaped, the hard way."
+    - Then "Try again as Nobody": 1 lane, "REINFORCEMENTS CANCELLED" banner, "Nobody escaped."
+- **Rhythm gate:**
+  - Direction reversals (with 25% hysteresis) are counted in the template's 4 highest total-variation features. A window's count must be within max(2, 35%) of the template's.
+  - `npm run test:gestures`: ALL PASS. Wave overhead is 6/6, and 0/6 on raise and swipe-up. The near-miss exemption was removed.
+  - Swipe-up firing during a wave is classed as a correct prefix match, since a wave starts with a swipe up.
+- `npx tsc --noEmit`, `npx eslint`, and `npx next build`: clean. No console errors.
 
 ## Ship artifacts
 - `pitch/story.md`, `pitch/script.md` (3:00), `pitch/storyboard.md`, `pitch/qa.md`, `pitch/recovery.md`
@@ -127,6 +141,6 @@ Copied from the run ledger.
 ## Next
 - Do a dry run of the 90-second judge path with a first-time player. Tune boss HP and attack tempo if it runs long.
 - Forge the backup demo power on the judging laptop the night before, in the browser profile used for the demo.
-- Address the wave-vs-raise near-miss, for example with a velocity-profile feature or by recording a negative sample.
+- Let the player record a "this is NOT my move" sample, to tune their power's boundary.
 - Deploy to Vercel once a login is approved.
 - More trials (Sirens, Scylla and Charybdis) are deliberately cut. They're the obvious "what's next".

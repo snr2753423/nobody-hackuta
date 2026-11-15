@@ -5,7 +5,7 @@ Shot by shot; matches `pitch/script.md` and `docs/demo-script.md`.
 | # | Time | On screen | Judge does | Speaker says |
 |---|---|---|---|---|
 | 1 | 0:00 | Title "NOBODY" on terracotta vase field; right column: webcam with cream glowing skeleton, "● tracking · ~30 fps" | Sits, sees skeleton follow them | Hook: Odysseus escapes by a lie |
-| 2 | 0:20 | Story card "THE CAVE", then Polyphemus: "What is your name?" with the single button "My name is… Nobody." | Clicks through, clicks Nobody | "That's the deception" |
+| 2 | 0:20 | Story card "THE CAVE", then Polyphemus: "What is your name?" with two buttons: "My name is… Nobody." / "I am Odysseus, son of Laertes." | Clicks through, clicks Nobody | "That's the deception" |
 | 3 | 0:35 | Phaser cave: black-figure Cyclops with tracking eye, club, rams, door-stone; dialogue "I will eat Nobody LAST!"; HUD boss bar with halfway notch, NOBODY HP, κλέος score | Watches | Controls explained |
 | 4 | 0:45 | Red ring under their lane + "LEAN AWAY!"; boulder arcs in; "DODGED +100". Floor flashes + "HANDS UP — SHIELD!"; golden aegis ring; "BLOCKED +150". Arms out → light orb hits the eye, "-7" | Leans, raises hands, extends arms; gesture chips light yellow | Point at prompts |
 | 5 | 1:05 | Boss at 50%: "CYCLOPES! NOBODY IS HURTING ME!", three one-eyed heads at the cave mouth, warning banner, their reply, "REINFORCEMENTS CANCELLED: No one comes for Nobody. TRICKSTER +500"; eye glows red (phase 2) | Watches | Silent, then one line |

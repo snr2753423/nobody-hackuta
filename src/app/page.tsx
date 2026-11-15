@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
-import { bus, keyState, type GameResult } from "@/lib/bus";
+import { bus, keyState, story, type GameResult, type PlayerName } from "@/lib/bus";
 import { poseHub } from "@/lib/poseHub";
 import { loadPowers, savePowers, MAX_POWERS, type ForgedPower } from "@/lib/powers";
 import { BACKUP_ABILITY, EFFECT_STYLE } from "@/lib/abilities";
@@ -98,7 +98,7 @@ export default function Home() {
   }, [phase, forgeOpen, castByIndex]);
 
   function begin() { unlockAudio(); setIntroStep(0); setPhase("intro"); }
-  function startFight() { setResult(null); setRunId((r) => r + 1); setPhase("fight"); }
+  function startFight(name?: PlayerName) { if (name) story.name = name; setResult(null); setRunId((r) => r + 1); setPhase("fight"); }
   function bindPower(p: ForgedPower) {
     const next = [p, ...powers].slice(0, MAX_POWERS);
     setPowers(next); savePowers(next); poseHub.engine.setPowers(next);
@@ -143,10 +143,11 @@ export default function Home() {
                   <p className="mt-2 font-serif text-xl leading-relaxed">{INTRO[introStep].text}</p>
                   <div className="mt-5 flex flex-wrap gap-3">
                     {INTRO[introStep].ask ? (
-                      <>
-                        <button onClick={startFight} className="btn-dark">&ldquo;My name is… <b>Nobody</b>.&rdquo;</button>
-                        <span className="self-center text-sm italic opacity-70">The lie that will save you.</span>
-                      </>
+                      <div className="flex flex-col gap-2">
+                        <button onClick={() => startFight("nobody")} className="btn-dark text-left">&ldquo;My name is… <b>Nobody</b>.&rdquo;</button>
+                        <button onClick={() => startFight("odysseus")} className="btn-ghost text-left">&ldquo;I am <b>Odysseus</b>, son of Laertes.&rdquo;</button>
+                        <span className="text-sm italic opacity-70">Choose carefully. If he calls for help, his brothers will hear your name.</span>
+                      </div>
                     ) : (
                       <button onClick={() => setIntroStep(1)} className="btn-dark">Continue →</button>
                     )}
@@ -159,16 +160,27 @@ export default function Home() {
               <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#16100c]/75 p-6">
                 <div className="max-w-2xl rounded-md border-4 border-[#16100c] bg-[#f4e4c6] p-6 text-center text-[#16100c] shadow-2xl">
                   <p className="font-display text-xs font-bold tracking-[0.3em] text-[#9e4a1c]">{result.won ? "VICTORY" : "DEFEAT"}</p>
-                  <h2 className="font-display mt-1 text-4xl font-black">{result.won ? "Nobody escaped." : "Polyphemus ate Nobody last."}</h2>
+                  <h2 className="font-display mt-1 text-4xl font-black">
+                    {result.name === "nobody"
+                      ? result.won ? "Nobody escaped." : "Polyphemus ate Nobody last."
+                      : result.won ? "Odysseus escaped, the hard way." : "Polyphemus ate Odysseus last."}
+                  </h2>
                   <p className="mt-3 font-serif text-lg leading-relaxed">
-                    {result.won
-                      ? "Blinded, the Cyclops rolls back the door-stone and feels the backs of his sheep as they pass. He never thinks to feel beneath them, where Odysseus's men cling to the bellies of the rams. Out at sea, Odysseus shouts his true name, and Poseidon's long curse begins."
-                      : "No one came to save you. Nobody ever does. But the cave remembers a trick or two. Try again, or forge a stronger power."}
+                    {result.name === "odysseus"
+                      ? result.won
+                        ? "You told the truth, and his brothers came. You won anyway, but Homer's hero was cleverer: he called himself Nobody, so when the Cyclops cried for help, no one came. Try the lie."
+                        : "You gave him your true name, so when he called, his brothers came. Homer's Odysseus said his name was Nobody. Try the lie."
+                      : result.won
+                        ? "Blinded, the Cyclops rolls back the door-stone and feels the backs of his sheep as they pass. He never thinks to feel beneath them, where Odysseus's men cling to the bellies of the rams. Out at sea, Odysseus shouts his true name, and Poseidon's long curse begins."
+                        : "No one came to save you. Nobody ever does. But the cave remembers a trick or two. Try again, or forge a stronger power."}
                   </p>
                   <p className="font-display mt-4 text-2xl font-bold">κλέος (glory): {result.score}</p>
                   <p className="text-sm opacity-70">time {(result.timeMs / 1000).toFixed(0)} s</p>
                   <div className="mt-5 flex justify-center gap-3">
-                    <button onClick={startFight} className="btn-dark">{result.won ? "Play again" : "Try again"}</button>
+                    <button onClick={() => startFight()} className="btn-dark">{result.won ? "Play again" : "Try again"}</button>
+                    {result.name === "odysseus" && (
+                      <button onClick={() => startFight("nobody")} className="btn-ghost-dark">Try again as <b>Nobody</b></button>
+                    )}
                     <button onClick={() => setForgeOpen(true)} className="btn-ghost-dark">⚒ Forge a Power</button>
                   </div>
                 </div>

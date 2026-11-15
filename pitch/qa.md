@@ -1,9 +1,11 @@
 # Judge Q&A
 
 ## What breaks first?
-**Recognizing forged moves that only differ by a small hand motion.** In our synthetic suite, a forged "wave overhead" also fired on a plain "raise arm overhead" in 4 of 6 trials. The big arm path is the same; only the hand flick differs.
+**Live recognition on bodies we haven't tested.** Our false-fire numbers come from a synthetic harness: 8 forged moves against 18 performed movements, zero cross-fires on distinct moves. Live, only one person has tested it.
 
-In that same synthetic harness, distinct moves never cross-fired, across 8 forged moves and 18 performed movements. Those are synthetic numbers, not live ones. The Forge tells players to pick moves with their own big arm path, and each power has a strict/normal/loose sensitivity setting.
+The hardest synthetic case was a "wave overhead" firing on a plain "raise arm overhead": 4 of 6 trials, before we added a rhythm check that counts direction reversals in the joints that vary most. It's now 0 of 6.
+
+If a real body behaves differently, each power has a strict/normal/loose sensitivity setting.
 
 **After that, lighting and framing.** MediaPipe needs your shoulders and hands in view. The camera badge says "step into view" when it can't see you, and keyboard controls back everything up.
 
@@ -25,7 +27,7 @@ That's a design property we can point to, not something we've tested with users.
 - **Next.js:** gives us one tiny server route, so the Gemini key never reaches the browser.
 
 ## What would you do with another week?
-- Fix the near-miss case: add a velocity-profile feature, or let the player record a "this is NOT my move" sample.
+- Let the player record a "this is NOT my move" sample, to tune their power's boundary.
 - Run first-time-player tests to tune difficulty.
 - Deploy publicly.
 - Build the next trial (the Sirens, where you must *not* move toward the song).
@@ -51,9 +53,11 @@ No.
 ## Hostile pass (grill-judge): the three hardest questions
 
 ### "Is the Nobody beat a mechanic or a cutscene? Could I have lost those reinforcements?"
-Honest answer: **it's scripted.** It always fires at 50% boss HP, and the intro offers only the "Nobody" answer, so you can't lose the reinforcements. It's a story beat inside the fight (attacks pause, the boss becomes invulnerable, phase 2 starts, +500 score), not a branching choice.
+**It's a real choice now.** The intro offers both answers.
+- **Say "Nobody":** at 50% HP his brothers come, laugh at "Nobody is hurting me", and leave. You get +500 Trickster.
+- **Say "Odysseus":** they stay at the cave mouth and throw boulders with him. Every boulder attack then covers two lanes, leaving one safe lane. The end card points you back to Homer's lie, and a "Try again as Nobody" button follows.
 
-A real choice is the obvious next step: answer "Odysseus" and the brothers come. We cut it to keep one polished path.
+Both paths are verified end to end in the browser.
 
 ### "Who besides you has forged a move live, and did it work the first time?"
 Honest answer: **only the developer.** It took three live rounds; the first two exposed bugs we fixed (dodge baseline, reverse-motion matching). We haven't run a first-time-player test yet; it's on our list before judging.

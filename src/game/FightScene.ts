@@ -1,6 +1,6 @@
 // "Escape Polyphemus" — the one trial. Greek black-figure vase art, all drawn in code.
 import Phaser from "phaser";
-import { bus, inputState, keyState, type GameEvent } from "@/lib/bus";
+import { bus, inputState, keyState, story as storyChoice, type GameEvent, type PlayerName } from "@/lib/bus";
 import { EFFECT_STYLE, type AbilityConfig, type Effect } from "@/lib/abilities";
 import { sfx } from "@/lib/sfx";
 
@@ -17,7 +17,7 @@ const FONT = () => {
   return v ? `${v}, Georgia, serif` : "Georgia, serif";
 };
 
-type Attack = { kind: "boulder" | "slam"; impactAt: number; lane: number; objs: Phaser.GameObjects.GameObject[] };
+type Attack = { kind: "boulder" | "slam"; impactAt: number; lanes: number[]; objs: Phaser.GameObjects.GameObject[] };
 
 export class FightScene extends Phaser.Scene {
   private t = 0;
@@ -28,6 +28,9 @@ export class FightScene extends Phaser.Scene {
   private story = true; // attacks paused while a story beat plays
   private ended = false;
   private nobodyDone = false;
+  /** What the player told Polyphemus. "odysseus" (the truth) means the brothers answer his call. */
+  private name: PlayerName = "nobody";
+  private reinforced = false;
   private stunnedUntil = 0;
   private nextAttackAt = 0;
   private attack: Attack | null = null;
@@ -65,7 +68,7 @@ export class FightScene extends Phaser.Scene {
     this.hud = this.add.graphics().setDepth(50);
     const font = { fontFamily: FONT() };
     this.add.text(W / 2, 56, "POLYPHEMUS · SON OF POSEIDON", { ...font, fontSize: "13px", color: "#16100c", fontStyle: "bold" }).setOrigin(0.5, 0).setDepth(51);
-    this.add.text(24, H - 64, "NOBODY", { ...font, fontSize: "13px", color: "#f4e4c6", fontStyle: "bold" }).setDepth(51);
+    this.add.text(24, H - 64, storyChoice.name === "nobody" ? "NOBODY" : "ODYSSEUS", { ...font, fontSize: "13px", color: "#f4e4c6", fontStyle: "bold" }).setDepth(51);
     this.scoreText = this.add.text(W - 24, 30, "", { ...font, fontSize: "18px", color: "#f4e4c6", fontStyle: "bold", stroke: "#16100c", strokeThickness: 5 }).setOrigin(1, 0).setDepth(51);
     this.prompt = this.add.text(W / 2, 392, "", { ...font, fontSize: "34px", color: "#f4e4c6", fontStyle: "bold", stroke: "#16100c", strokeThickness: 6 }).setOrigin(0.5).setDepth(60);
     this.banner = this.add.text(W / 2, 200, "", { ...font, fontSize: "22px", color: "#f4e4c6", fontStyle: "bold", stroke: "#16100c", strokeThickness: 5, align: "center" }).setOrigin(0.5).setDepth(61).setAlpha(0);
@@ -77,7 +80,10 @@ export class FightScene extends Phaser.Scene {
     this.events.once("destroy", () => this.off?.());
 
     // Opening beat, straight from Book 9.
-    this.say("POLYPHEMUS", "NOBODY, you say? Then here is my gift for your wine: I will eat Nobody LAST!", 3600);
+    this.name = storyChoice.name;
+    this.say("POLYPHEMUS", this.name === "nobody"
+      ? "NOBODY, you say? Then here is my gift for your wine: I will eat Nobody LAST!"
+      : "ODYSSEUS, son of Laertes? A proud name. My gift for your wine: I will eat Odysseus LAST!", 3600);
     sfx.roar();
     this.time.delayedCall(3800, () => {
       this.story = false;
@@ -124,16 +130,22 @@ export class FightScene extends Phaser.Scene {
     const tele = this.phase === 1 ? 1500 : 1150;
     const objs: Phaser.GameObjects.GameObject[] = [];
     const lane = this.lane;
+    // With his brothers at the door, a second boulder lands in another lane: only one lane is safe.
+    const lanes = [lane];
+    if (this.reinforced) lanes.push(Phaser.Utils.Array.GetRandom([0, 1, 2].filter((l) => l !== lane)));
     sfx.warn();
     if (kind === "boulder") {
       const ring = this.add.graphics().setDepth(5);
-      ring.lineStyle(4, C.red, 1).strokeEllipse(LANES[lane], GROUND + 18, 150, 34);
-      ring.fillStyle(C.red, 0.25).fillEllipse(LANES[lane], GROUND + 18, 150, 34);
+      for (const l of lanes) {
+        ring.lineStyle(4, C.red, 1).strokeEllipse(LANES[l], GROUND + 18, 150, 34);
+        ring.fillStyle(C.red, 0.25).fillEllipse(LANES[l], GROUND + 18, 150, 34);
+      }
       this.tweens.add({ targets: ring, alpha: 0.35, yoyo: true, repeat: -1, duration: 160 });
       objs.push(ring);
       this.rock.setVisible(true);
       this.tweens.add({ targets: this.rock, y: -250, duration: 400, ease: "Back.out" });
-      this.flashPrompt(lane === 1 ? "LEAN LEFT OR RIGHT!" : "LEAN AWAY!", tele);
+      const safe = [0, 1, 2].find((l) => !lanes.includes(l))!;
+      this.flashPrompt(lanes.length > 1 ? (safe === 1 ? "SIT UPRIGHT — CENTER IS SAFE!" : safe === 0 ? "LEAN LEFT!" : "LEAN RIGHT!") : lane === 1 ? "LEAN LEFT OR RIGHT!" : "LEAN AWAY!", tele);
     } else {
       this.tweens.add({ targets: this.club, angle: -150, duration: tele * 0.8, ease: "Quad.out" });
       const floor = this.add.rectangle(W / 2, GROUND + 20, W, 70, C.red, 0.28).setDepth(4);
@@ -141,7 +153,7 @@ export class FightScene extends Phaser.Scene {
       objs.push(floor);
       this.flashPrompt("HANDS UP — SHIELD!", tele);
     }
-    this.attack = { kind, impactAt: this.t + tele, lane, objs };
+    this.attack = { kind, impactAt: this.t + tele, lanes, objs };
   }
 
   private cancelAttack() {
@@ -159,18 +171,22 @@ export class FightScene extends Phaser.Scene {
     this.attack = null;
     this.prompt.setText("");
     if (a.kind === "boulder") {
-      const target = LANES[a.lane];
-      const boulder = this.add.image(BOSS_X + 130, BOSS_Y - 250, "boulder").setDepth(30);
       this.rock.setVisible(false).setY(-120);
-      const hit = this.lane === a.lane;
-      this.tweens.add({
-        targets: boulder, x: target, y: GROUND - 10, angle: 360, duration: 320, ease: "Quad.in",
-        onComplete: () => {
-          this.cameras.main.shake(160, 0.008);
-          this.tweens.add({ targets: boulder, alpha: 0, x: target + (hit ? 0 : 60), duration: 500, onComplete: () => boulder.destroy() });
-          if (hit) this.hurtPlayer(18, "CRUSHED!");
-          else { sfx.dodge(); this.addScore(100); this.popText(this.player.x, GROUND - 90, "DODGED +100", "#f4e4c6"); }
-        },
+      const hit = a.lanes.includes(this.lane);
+      a.lanes.forEach((l, k) => {
+        const target = LANES[l];
+        // first boulder from Polyphemus, second thrown by a brother at the cave mouth
+        const boulder = this.add.image(k === 0 ? BOSS_X + 130 : 160, k === 0 ? BOSS_Y - 250 : 260, "boulder").setDepth(30);
+        this.tweens.add({
+          targets: boulder, x: target, y: GROUND - 10, angle: 360, duration: 320, ease: "Quad.in",
+          onComplete: () => {
+            this.tweens.add({ targets: boulder, alpha: 0, x: target + 40, duration: 500, onComplete: () => boulder.destroy() });
+            if (k !== 0) return;
+            this.cameras.main.shake(160, 0.008);
+            if (hit) this.hurtPlayer(18, "CRUSHED!");
+            else { sfx.dodge(); this.addScore(100); this.popText(this.player.x, GROUND - 90, "DODGED +100", "#f4e4c6"); }
+          },
+        });
       });
     } else {
       this.tweens.add({
@@ -254,6 +270,7 @@ export class FightScene extends Phaser.Scene {
 
   // ---------------- story: "Nobody is hurting me!" ----------------
   private nobodyBeat() {
+    if (this.name === "odysseus") { this.truthBeat(); return; }
     this.nobodyDone = true;
     this.story = true;
     this.cancelAttack();
@@ -286,6 +303,39 @@ export class FightScene extends Phaser.Scene {
     });
   }
 
+  /** The road Homer's hero did not take: he told the truth, so the brothers come. */
+  private truthBeat() {
+    this.nobodyDone = true;
+    this.story = true;
+    this.cancelAttack();
+    this.stunnedUntil = 0;
+    bus.emit({ type: "story", beat: "nobody" });
+    sfx.roar();
+    this.cameras.main.shake(500, 0.01);
+    this.say("POLYPHEMUS", "CYCLOPES! BROTHERS! ODYSSEUS, SON OF LAERTES, IS HURTING ME!", 2600);
+    this.time.delayedCall(1600, () => {
+      this.showBanner("⚠ REINFORCEMENTS: 3 CYCLOPES AT THE CAVE MOUTH", 1800, "#ffd2c4");
+      this.cyclopes.setVisible(true).setAlpha(0);
+      this.tweens.add({ targets: this.cyclopes, alpha: 1, y: 0, duration: 500 });
+    });
+    this.time.delayedCall(2800, () => {
+      sfx.roar();
+      this.say("THE OTHER CYCLOPES", "ODYSSEUS? We know that name now. Hold on, brother. We throw with you!", 2700);
+    });
+    this.time.delayedCall(5600, () => {
+      this.showBanner("REINFORCEMENTS ARRIVE\nYou told the truth. Two boulders per throw now.", 2200, "#ffd2c4");
+    });
+    this.time.delayedCall(7600, () => {
+      this.say("POLYPHEMUS", "Crush him, brothers! Crush ODYSSEUS!", 1800);
+      this.phase = 2;
+      this.reinforced = true;
+      this.eyeGlow.setVisible(true);
+      this.tweens.add({ targets: this.eyeGlow, alpha: 0.3, yoyo: true, repeat: -1, duration: 400 });
+      this.story = false;
+      this.nextAttackAt = this.t + 1200;
+    });
+  }
+
   private win() {
     this.ended = true;
     this.cancelAttack();
@@ -305,12 +355,12 @@ export class FightScene extends Phaser.Scene {
         scar.fillStyle(C.black, 1).fillEllipse(BOSS_X, BOSS_Y - 150, 46, 30);
         scar.lineStyle(3, C.red, 1).lineBetween(BOSS_X - 22, BOSS_Y - 160, BOSS_X + 22, BOSS_Y - 140).lineBetween(BOSS_X + 22, BOSS_Y - 160, BOSS_X - 22, BOSS_Y - 140);
         stake.destroy();
-        this.say("POLYPHEMUS", "AAARGH! NOBODY HAS BLINDED ME!", 2600);
+        this.say("POLYPHEMUS", this.name === "nobody" ? "AAARGH! NOBODY HAS BLINDED ME!" : "AAARGH! ODYSSEUS HAS BLINDED ME! Father Poseidon, curse him!", 2600);
         this.tweens.add({ targets: this.boss, angle: -6, yoyo: true, repeat: 3, duration: 220 });
         const bonus = Math.max(0, Math.round(3000 - this.t / 1000 * 20)) + this.playerHp * 10;
         this.addScore(bonus);
         sfx.victory();
-        this.time.delayedCall(2900, () => bus.emit({ type: "over", result: { won: true, score: this.score, timeMs: this.t } }));
+        this.time.delayedCall(2900, () => bus.emit({ type: "over", result: { won: true, score: this.score, timeMs: this.t, name: this.name } }));
       },
     });
   }
@@ -319,9 +369,9 @@ export class FightScene extends Phaser.Scene {
     this.ended = true;
     this.cancelAttack();
     sfx.defeat();
-    this.say("POLYPHEMUS", "Ha! NOBODY is nothing now. Nobody will mourn you.", 2400);
+    this.say("POLYPHEMUS", this.name === "nobody" ? "Ha! NOBODY is nothing now. Nobody will mourn you." : "Ha! My brothers and I thank you for your name, ODYSSEUS.", 2400);
     this.tweens.add({ targets: this.player, angle: 90, y: GROUND + 10, alpha: 0.6, duration: 600 });
-    this.time.delayedCall(2500, () => bus.emit({ type: "over", result: { won: false, score: this.score, timeMs: this.t } }));
+    this.time.delayedCall(2500, () => bus.emit({ type: "over", result: { won: false, score: this.score, timeMs: this.t, name: this.name } }));
   }
 
   // ---------------- effects ----------------
